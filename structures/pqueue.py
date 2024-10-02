@@ -27,6 +27,7 @@ class PriorityQueue:
         """
         self._arr = DynamicArray()
         self._max_priority = 0
+        self._min_cache = None
 
     def _parent(self, ix: int) -> int:
         """
@@ -39,14 +40,14 @@ class PriorityQueue:
         Insert some data to the queue with a given priority.
         """
         new = Entry(priority, data)
-        # Put it at the back of the heap
         self._arr.append(new)
-        ix = self._arr.get_size() - 1
-        # Now swap it upwards with its parent until heap order is restored
-        while ix > 0 and self._arr[ix].get_key() < self._arr[self._parent(ix)].get_key():
-            parent_ix = self._parent(ix)
-            self._arr[ix], self._arr[parent_ix] = self._arr[parent_ix], self._arr[ix]
-            ix = parent_ix
+        self._sift_up(self._arr.get_size() - 1)
+        
+        if priority > self._max_priority:
+            self._max_priority = priority
+        
+        if self._min_cache is None or priority < self._min_cache.get_key():
+            self._min_cache = new
         
         #update max priority if incoming priority is the maximum
         if priority > self._max_priority:
@@ -67,7 +68,7 @@ class PriorityQueue:
         """
         if self.is_empty():
             return None
-        return self._arr[0].get_key()
+        return self._min_cache.get_key()
 
     def get_min_value(self) -> Any:
         """
@@ -75,7 +76,7 @@ class PriorityQueue:
         """
         if self.is_empty():
             return None
-        return self._arr[0].get_value()
+        return self._min_cache.get_value()
 
     def remove_min(self) -> Any:
         """
@@ -84,15 +85,19 @@ class PriorityQueue:
         """
         if self.is_empty():
             return None
-        result = self._arr[0]
-        last_item = self._arr[self.get_size() - 1]
-        self._arr.remove_at(self.get_size() - 1)
-
+        
+        result = self._min_cache.get_value()
+        last_item = self._arr[self._arr.get_size() - 1]
+        self._arr.remove_at(self._arr.get_size() - 1)
+        
         if not self.is_empty():
             self._arr[0] = last_item
-            self._heapify(0, self.get_size())
-
-        return result.get_value()
+            self._sift_down(0)
+            self._min_cache = self._arr[0]
+        else:
+            self._min_cache = None
+        
+        return result
 
     def get_size(self) -> int:
         """
@@ -115,14 +120,13 @@ class PriorityQueue:
         only O(1) extra space.
         """
         self._arr = input_list
+        size = self._arr.get_size()
 
-        start = (self._arr.get_size() // 2) - 1
+        for i in range(size // 2 - 1, -1, -1):
+            self._sift_down(i)
 
-        # Perform sift-down from the last non-leaf node to the root
-        for i in range(start, -1, -1):
-            self._heapify(i, self._arr.get_size())
+        self._min_cache = self._arr[0] if not self.is_empty() else None
 
-        # Update max_priority
         for i in range(self._arr.get_size()):
             if self._arr[i]:
                 self._max_priority = max(self._max_priority, self._arr[i].get_key())
@@ -138,36 +142,57 @@ class PriorityQueue:
         destroyed and will not be used again (hence returning the underlying
         array back to the caller).
         """
-        n = self.get_size()
-
-        for i in range(n // 2 - 1, -1, -1):
-            self._heapify(i, n)
+        n = self._arr.get_size()
 
         for i in range(n - 1, 0, -1):
-            # Move current root to the end
             self._arr[0], self._arr[i] = self._arr[i], self._arr[0]
-
-            self._heapify(0, i)
+            self._sift_down_bounded(0, i)
 
         return self._arr
     
     def get_arrary(self) -> DynamicArray:
         return self._arr
     
-    def _heapify(self, root: int, size: int) -> None:
-        """
-        Helper method to restore the min heap property in a subtree.
-        """
-        smallest = root
-        left = 2 * root + 1
-        right = 2 * root + 2
+    def _sift_down_bounded(self, index: int, size: int) -> None:
+        while True:
+            smallest = index
+            left = 2 * index + 1
+            right = 2 * index + 2
+            
+            if left < size and self._arr[left].get_key() < self._arr[smallest].get_key():
+                smallest = left
+            if right < size and self._arr[right].get_key() < self._arr[smallest].get_key():
+                smallest = right
+            
+            if smallest == index:
+                break
+            
+            self._arr[index], self._arr[smallest] = self._arr[smallest], self._arr[index]
+            index = smallest
+    
+    def _sift_up(self, index: int) -> None:
+        while index > 0:
+            parent = self._parent(index)
+            if self._arr[index].get_key() < self._arr[parent].get_key():
+                self._arr[index], self._arr[parent] = self._arr[parent], self._arr[index]
+                index = parent
+            else:
+                break
 
-        if left < size and self._arr[left].get_key() < self._arr[smallest].get_key():
-            smallest = left
-
-        if right < size and self._arr[right].get_key() < self._arr[smallest].get_key():
-            smallest = right
-
-        if smallest != root:
-            self._arr[root], self._arr[smallest] = self._arr[smallest], self._arr[root]
-            self._heapify(smallest, size)
+    def _sift_down(self, index: int) -> None:
+        size = self._arr.get_size()
+        while True:
+            smallest = index
+            left = 2 * index + 1
+            right = 2 * index + 2
+            
+            if left < size and self._arr[left].get_key() < self._arr[smallest].get_key():
+                smallest = left
+            if right < size and self._arr[right].get_key() < self._arr[smallest].get_key():
+                smallest = right
+            
+            if smallest == index:
+                break
+            
+            self._arr[index], self._arr[smallest] = self._arr[smallest], self._arr[index]
+            index = smallest
