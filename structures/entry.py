@@ -67,7 +67,7 @@ class Entry(Hashable):
         assignment, your universe could be something like integers in
         [0, 2^32-1].
         """
-
+        return super().get_hash()
 class Compound:
     """
     Implements the Compound Type used in Task 3.3. Please do not modify this

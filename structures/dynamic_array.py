@@ -4,7 +4,7 @@ The University of Queensland
 Joel Mackenzie and Vladimir Morozov
 """
 
-from typing import Any
+from typing import Any, List
 from collections.abc import Iterator
 from random import randint
 

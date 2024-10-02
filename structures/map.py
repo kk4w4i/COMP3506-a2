@@ -20,6 +20,7 @@ get_hash function to return -1 for example.
 
 from typing import Any
 from structures.entry import Entry
+from structures.dynamic_array import DynamicArray
 
 class Map:
     """
@@ -33,7 +34,20 @@ class Map:
         You are free to make any changes you find suitable in this function
         to initialise your map.
         """
-        pass
+        self.table = [None] * 128
+        self.size = 0
+        self.capacity = 128
+
+    def _resize(self) -> None:
+        old_table = self.table
+        self.capacity *= 2
+        self.table = [[None] * self.capacity]
+        self.size = 0
+        for bucket in old_table:
+            if bucket:
+                for entry in bucket:
+                    self.insert(entry)
+        
 
     def insert(self, entry: Entry) -> Any | None:
         """
@@ -42,7 +56,21 @@ class Map:
         None otherwise. (We will not use None as a key or a value in our tests).
         Time complexity for full marks: O(1*)
         """
-        pass
+        if self.size / self.capacity > 0.75:
+            self._resize()
+
+        index = self._hash(entry.get_key())
+        if self.table[index] is None:
+            self.table[index] = DynamicArray()
+        else:
+            for exist_entry in self.table[index]:
+                if exist_entry == entry:
+                    old_value = exist_entry.get_value()
+                    exist_entry.update_value(entry.get_value())
+                return old_value
+        self.table[index].append(entry)
+        self.size += 1
+        return None
 
     def insert_kv(self, key: Any, value: Any) -> Any | None:
         """
@@ -53,7 +81,7 @@ class Map:
         Time complexity for full marks: O(1*)
         """
         #hint: entry = Entry(key, value)
-        pass
+        return self.insert(Entry(key, value))
 
     def __setitem__(self, key: Any, value: Any) -> None:
         """
@@ -62,7 +90,7 @@ class Map:
         anything. Can be used like: my_map[some_key] = some_value
         Time complexity for full marks: O(1*)
         """
-        pass
+        self.insert_kv(key, value)
 
     def remove(self, key: Any) -> None:
         """
@@ -70,7 +98,13 @@ class Map:
         data structure. Don't return anything.
         Time complexity for full marks: O(1*)
         """
-        pass
+        index = self._hash(key)
+        if self.table[index]:
+            for i, entry in enumerate(self.table[index]):
+                if entry.get_key() == key:
+                    self.table[index].remove(i)
+                    self.size -= 1
+                    return
 
     def find(self, key: Any) -> Any | None:
         """
@@ -78,7 +112,12 @@ class Map:
         exists; return None otherwise.
         Time complexity for full marks: O(1*)
         """
-        pass
+        index = self._hash(key)
+        if self.table[index]:
+            for entry in self.table[index]:
+                if entry.get_key() == key:
+                    return entry.get_value()
+        return None
 
     def __getitem__(self, key: Any) -> Any | None:
         """
@@ -86,16 +125,22 @@ class Map:
         for find()
         Time complexity for full marks: O(1*)
         """
-        pass
+        return self.find(key)
 
     def get_size(self) -> int:
         """
         Time complexity for full marks: O(1)
         """
-        pass
+        return self.size
 
     def is_empty(self) -> bool:
         """
         Time complexity for full marks: O(1)
         """
-        pass
+        return self.size == 0
+
+    def _hash(self, key: Any) -> int:
+        temp_entry = Entry(key, None)
+        print(temp_entry.get_hash() % self.capacity) 
+        return temp_entry.get_hash() % self.capacity
+

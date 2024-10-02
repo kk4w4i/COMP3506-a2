@@ -28,8 +28,13 @@ class Hashable(ABC):
         if you wish to hash keys of a specific type. See entry.py for more
         help in this direction, as well as map.py
         """
-        pass
-
+        byte_array = object_to_byte_array(self.get_key())
+        
+        hash_value = 0
+        for byte in byte_array:
+            hash_value = (hash_value * 29 + byte) & 0xFFFFFFFF
+        
+        return hash_value
 
 """
 Any other utilities can go below here.
