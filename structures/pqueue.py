@@ -85,11 +85,13 @@ class PriorityQueue:
         if self.is_empty():
             return None
         result = self._arr[0]
-        self._arr[0] = self._arr[self.get_size() - 1]
+        last_item = self._arr[self.get_size() - 1]
         self._arr.remove_at(self.get_size() - 1)
 
-        cur = 0
-        self._heapify(cur, self.get_size())
+        if not self.is_empty():
+            self._arr[0] = last_item
+            self._heapify(0, self.get_size())
+
         return result.get_value()
 
     def get_size(self) -> int:
@@ -139,7 +141,7 @@ class PriorityQueue:
         n = self.get_size()
 
         for i in range(n // 2 - 1, -1, -1):
-            self._heapify(n, i)
+            self._heapify(i, n)
 
         for i in range(n - 1, 0, -1):
             # Move current root to the end
