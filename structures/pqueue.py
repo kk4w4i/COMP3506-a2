@@ -154,25 +154,20 @@ class PriorityQueue:
     def get_arrary(self) -> DynamicArray:
         return self._arr
     
-    def _heapify(self, start: int, end: int) -> None:
+    def _heapify(self, root: int, size: int) -> None:
         """
         Helper method to restore the min heap property in a subtree.
         """
-        cur = start
-        while cur < end:
-            left = (cur * 2) + 1
-            right = (cur * 2) + 2
+        smallest = root
+        left = 2 * root + 1
+        right = 2 * root + 2
 
-            smallest = cur
-            if left < self.get_size() and self._arr[smallest].get_key() > self._arr[left].get_key():
-                smallest = left
-            if right < self.get_size() and self._arr[smallest].get_key() > self._arr[right].get_key():
-                smallest = right
-            if smallest != cur:
-                self._arr[cur], self._arr[smallest] = (
-                    self._arr[smallest],
-                    self._arr[cur],
-                )
-                cur = smallest
-            else:
-                break
+        if left < size and self._arr[left].get_key() < self._arr[smallest].get_key():
+            smallest = left
+
+        if right < size and self._arr[right].get_key() < self._arr[smallest].get_key():
+            smallest = right
+
+        if smallest != root:
+            self._arr[root], self._arr[smallest] = self._arr[smallest], self._arr[root]
+            self._heapify(smallest, size)
