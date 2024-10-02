@@ -138,6 +138,9 @@ class PriorityQueue:
         """
         n = self.get_size()
 
+        for i in range(n // 2 - 1, -1, -1):
+            self._heapify(n, i)
+
         for i in range(n - 1, 0, -1):
             # Move current root to the end
             self._arr[0], self._arr[i] = self._arr[i], self._arr[0]
