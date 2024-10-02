@@ -102,7 +102,7 @@ class Map:
         if self.table[index]:
             for i, entry in enumerate(self.table[index]):
                 if entry.get_key() == key:
-                    self.table[index].remove(i)
+                    self.table[index].remove_at(i)
                     self.size -= 1
                     return
 
