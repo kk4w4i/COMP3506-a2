@@ -113,7 +113,7 @@ class Map:
         Time complexity for full marks: O(1*)
         """
         index = self._hash(key)
-        if self.table[index]:
+        if self.table[index] != None:
             for entry in self.table[index]:
                 if entry.get_key() == key:
                     return entry.get_value()
