@@ -34,9 +34,10 @@ class Map:
         You are free to make any changes you find suitable in this function
         to initialise your map.
         """
-        self.table = [None] * 128
-        self.size = 0
         self.capacity = 128
+        self.size = 0
+        self.table = [None] * self.capacity
+        self.load_factor_threshold = 0.75
 
     def _resize(self) -> None:
         old_table = self.table
@@ -57,21 +58,22 @@ class Map:
         None otherwise. (We will not use None as a key or a value in our tests).
         Time complexity for full marks: O(1*)
         """
-        if self.size / self.capacity > 0.75:
+        if self.size / self.capacity > self.load_factor_threshold:
             self._resize()
 
         index = self._hash(entry.get_key())
         if self.table[index] is None:
             self.table[index] = DynamicArray()
-        else:
-            bucket = self.table[index]
-            for i in range(bucket.get_size()):
-                exist_entry = bucket[i]
-                if exist_entry == entry:
-                    old_value = exist_entry.get_value()
-                    exist_entry.update_value(entry.get_value())
-                    return old_value
-        self.table[index].append(entry)
+
+        bucket = self.table[index]
+        for i in range(bucket.get_size()):
+            existing_entry = bucket[i]
+            if existing_entry.get_key() == entry.get_key():
+                old_value = existing_entry.get_value()
+                existing_entry.update_value(entry.get_value())
+                return old_value
+
+        bucket.append(entry)
         self.size += 1
         return None
 
@@ -105,9 +107,8 @@ class Map:
         if self.table[index]:
             bucket = self.table[index]
             for i in range(bucket.get_size()):
-                entry = bucket[i]
-                if entry.get_key() == key:
-                    self.table[index].remove_at(i)
+                if bucket[i].get_key() == key:
+                    bucket.remove_at(i)
                     self.size -= 1
                     return
 
@@ -118,12 +119,12 @@ class Map:
         Time complexity for full marks: O(1*)
         """
         index = self._hash(key)
-        if self.table[index] != None:
+        if self.table[index]:
             bucket = self.table[index]
             for i in range(bucket.get_size()):
-                    entry = bucket[i]
-                    if entry.get_key() == key:
-                        return entry.get_value()
+                entry = bucket[i]
+                if entry.get_key() == key:
+                    return entry.get_value()
         return None
 
     def __getitem__(self, key: Any) -> Any | None:

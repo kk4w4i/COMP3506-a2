@@ -29,13 +29,14 @@ class Hashable(ABC):
         help in this direction, as well as map.py
         """
         byte_array = object_to_byte_array(self.get_key())
-        mask = (1 << 32) - 1
-        h = 0 
-
-        hash_value = 0
+        FNV_OFFSET_BASIS_64 = 14695981039346656037
+        FNV_PRIME_64 = 1099511628211
+        
+        hash_value = FNV_OFFSET_BASIS_64
         for byte in byte_array:
-            hash_value = (h << 5 & mask) | (h >> 27) 
-            hash_value += byte
+            hash_value ^= byte
+            hash_value *= FNV_PRIME_64
+        
         return hash_value
 
 """
