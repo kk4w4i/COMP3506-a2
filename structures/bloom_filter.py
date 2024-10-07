@@ -3,8 +3,8 @@ Skeleton for COMP3506/7505 A2, S2, 2024
 The University of Queensland
 Joel Mackenzie and Vladimir Morozov
 """
-
 from typing import Any
+from structures.util import Hashable, object_to_byte_array
 from structures.bit_vector import BitVector
 
 class BloomFilter:
@@ -31,12 +31,16 @@ class BloomFilter:
     [0-255] of course).
     """
 
+    HASH_FUNCTIONS = 3
+
     def __init__(self, max_keys: int) -> None:
         # You should use max_keys to decide how many bits your bitvector
         # should have, and allocate it accordingly.
         self._data = BitVector()
-        
+        self._data.allocate(max_keys * self._data.BITS_PER_ELEMENT)
         # More variables here if you need, of course
+        self._max_keys = max_keys
+        self._hashes = max(1, int((self._data.get_size() / max_keys) * 0.693))
     
     def __str__(self) -> str:
         """
@@ -45,13 +49,15 @@ class BloomFilter:
         This is not marked. <<<<
         """
         pass
-
+    
     def insert(self, key: Any) -> None:
         """
         Insert a key into the Bloom filter.
         Time complexity for full marks: O(1)
         """
-        pass
+        for i in range(self._hashes):
+            index = self.get_hash(key, i)
+            self._data.set_at(index)
 
     def contains(self, key: Any) -> bool:
         """
@@ -59,7 +65,11 @@ class BloomFilter:
         over k are set. False otherwise.
         Time complexity for full marks: O(1)
         """
-        pass
+        for i in range(self._hashes):
+            index = self.get_hash(key, i)
+            if self._data.get_at(index) == 0:
+                return False
+        return True
 
     def __contains__(self, key: Any) -> bool:
         """
@@ -67,13 +77,17 @@ class BloomFilter:
         `if key in my_bloom_filter:`
         Time complexity for full marks: O(1)
         """
+        return self.contains(key)
 
     def is_empty(self) -> bool:
         """
         Boolean helper to tell us if the structure is empty or not
         Time complexity for full marks: O(1)
         """
-        pass
+        for i in range(self._data.get_size()):
+            if self._data.get_at(i) == 1:
+                return False
+        return True
 
     def get_capacity(self) -> int:
         """
@@ -81,5 +95,16 @@ class BloomFilter:
         BitVector can currently maintain.
         Time complexity for full marks: O(1)
         """
-        pass
+        return self._data.get_size()
+
+    def get_hash(self, item: Any, hash_num: int) -> int:
+        byte_array = object_to_byte_array(item)
+        
+        hash_value = 0
+        for byte in byte_array:
+            # Modify the byte based on the hash function number
+            modified_byte = (byte + hash_num) & 0xFF
+            hash_value = (hash_value * 29 + modified_byte) & 0xFFFFFFFF
+        
+        return hash_value % self._data.get_size()
 
