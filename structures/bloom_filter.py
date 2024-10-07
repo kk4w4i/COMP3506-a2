@@ -96,16 +96,25 @@ class BloomFilter:
         return self._data.get_size()
 
     def get_hash(self, key: Any, hash_num: int) -> int:
+        # FNV-1a hashing
         byte_array = object_to_byte_array(key)
-        mask = (1 << 32) - 1
-        h = hash_num 
-
-        hash_value = 0
+        FNV_PRIME = 1099511628211
+        FNV_OFFSET_BASIS = 14695981039346656037
+        
+        hash_value = FNV_OFFSET_BASIS
         for byte in byte_array:
-            hash_value = ((h << 5) & mask) | (h >> 27)
-            hash_value += byte
-            h = hash_value
+            hash_value ^= byte
+            hash_value *= FNV_PRIME
+        
+        # Use double hashing to generate different hash values
+        return ((hash_value + hash_num * self.secondary_hash(key)) % self._data.get_size())
 
+    def secondary_hash(self, key: Any) -> int:
+        byte_array = object_to_byte_array(key)
+        hash_value = 0x5151_5151_5151_5151  # 64-bit initial value
+        for byte in byte_array:
+            hash_value = ((hash_value << 5) | (hash_value >> 59))  # 64-bit cyclic shift
+            hash_value = (hash_value + byte) & 0xFFFF_FFFF_FFFF_FFFF  # Ensure 64-bit unsigned
         return hash_value % self._data.get_size()
     
     def calculate_bit_array_size(self, n: int, p: float) -> int:
