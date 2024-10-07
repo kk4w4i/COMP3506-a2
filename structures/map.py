@@ -115,9 +115,11 @@ class Map:
         """
         index = self._hash(key)
         if self.table[index] != None:
-            for entry in self.table[index]:
-                if entry.get_key() == key:
-                    return entry.get_value()
+            bucket = self.table[index]
+            for i in range(bucket.get_size()):
+                    entry = bucket[i]
+                    if entry.get_key() == key:
+                        return entry.get_value()
         return None
 
     def __getitem__(self, key: Any) -> Any | None:
@@ -142,7 +144,6 @@ class Map:
 
     def _hash(self, key: Any) -> int:
         temp_entry = Entry(key, None)
-        print(temp_entry.get_hash() % self.capacity) 
         return temp_entry.get_hash() % self.capacity
     
     def __str__(self):
