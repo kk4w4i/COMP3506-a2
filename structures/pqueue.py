@@ -43,11 +43,19 @@ class PriorityQueue:
         self._arr.append(new)
         ix = self._arr.get_size() - 1
         # Now swap it upwards with its parent until heap order is restored
-        while ix > 0 and self._arr[ix].get_key() < self._arr[self._parent(ix)].get_key():
+        while ix > 0:
             parent_ix = self._parent(ix)
-            self._arr[ix], self._arr[parent_ix] = self._arr[parent_ix], self._arr[ix]
-            ix = parent_ix
-        
+            if self._arr[ix].get_key() < self._arr[parent_ix].get_key():
+                # Swap if the new entry has higher priority (lower key value)
+                self._arr[ix], self._arr[parent_ix] = self._arr[parent_ix], self._arr[ix]
+                ix = parent_ix
+            elif self._arr[ix].get_key() == self._arr[parent_ix].get_key():
+                # If priorities are equal, maintain FIFO order by not swapping
+                break
+            else:
+                # If the new entry has lower priority, stop here
+                break
+    
         #update max priority if incoming priority is the maximum
         if priority > self._max_priority:
             self._max_priority = priority
@@ -84,7 +92,8 @@ class PriorityQueue:
         """
         if self.is_empty():
             return None
-        result = self._arr[0]
+        
+        result = self._arr[0].get_value()
         last_item = self._arr[self.get_size() - 1]
         self._arr.remove_at(self.get_size() - 1)
 
@@ -92,7 +101,7 @@ class PriorityQueue:
             self._arr[0] = last_item
             self._heapify(0, self.get_size())
 
-        return result.get_value()
+        return result
 
     def get_size(self) -> int:
         """
@@ -152,7 +161,12 @@ class PriorityQueue:
         return self._arr
     
     def get_arrary(self) -> DynamicArray:
-        return self._arr
+        result = []
+        size = self._arr.get_size()
+        for i in range(size):
+            result.append(self._arr[i])
+
+        return result
     
     def _heapify(self, root: int, size: int) -> None:
         """
