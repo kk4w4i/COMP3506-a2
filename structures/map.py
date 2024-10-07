@@ -70,7 +70,7 @@ class Map:
                 if exist_entry == entry:
                     old_value = exist_entry.get_value()
                     exist_entry.update_value(entry.get_value())
-                return old_value
+                    return old_value
         self.table[index].append(entry)
         self.size += 1
         return None
