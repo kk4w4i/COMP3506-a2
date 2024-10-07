@@ -101,7 +101,9 @@ class Map:
         """
         index = self._hash(key)
         if self.table[index]:
-            for i, entry in enumerate(self.table[index]):
+            bucket = self.table[index]
+            for i in range(bucket.get_size()):
+                entry = bucket[i]
                 if entry.get_key() == key:
                     self.table[index].remove_at(i)
                     self.size -= 1
