@@ -83,7 +83,7 @@ class BloomFilter:
         Boolean helper to tell us if the structure is empty or not
         Time complexity for full marks: O(1)
         """
-        for i in range(self._data.get_size()):
+        for i in range(self._size):
             if self._data.get_at(i) == 1:
                 return False
         return True
@@ -94,7 +94,7 @@ class BloomFilter:
         BitVector can currently maintain.
         Time complexity for full marks: O(1)
         """
-        return self._data.get_size()
+        return self._size
 
     def hash1(self, key: Any) -> int:
         byte_array = object_to_byte_array(key)
