@@ -37,7 +37,7 @@ class BloomFilter:
         # You should use max_keys to decide how many bits your bitvector
         # should have, and allocate it accordingly.
         self._data = BitVector()
-        self._data.allocate(max_keys * self._data.BITS_PER_ELEMENT)
+        self._data.allocate(max_keys * 6)
         # More variables here if you need, of course
         self._max_keys = max_keys
         self._hashes = max(1, int((self._data.get_size() / max_keys) * 0.693))
@@ -49,7 +49,7 @@ class BloomFilter:
         This is not marked. <<<<
         """
         pass
-    
+
     def insert(self, key: Any) -> None:
         """
         Insert a key into the Bloom filter.
