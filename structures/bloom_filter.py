@@ -33,16 +33,16 @@ class BloomFilter:
     [0-255] of course).
     """
 
-    FP_RATE = 0.10
+    FP_RATE = 0.02
 
     def __init__(self, max_keys: int) -> None:
         # You should use max_keys to decide how many bits your bitvector
         # should have, and allocate it accordingly.
         self._data = BitVector()
-        self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE)) 
-         # More variables here if you need, of course
-        self._hashes = int((self._data.get_size() / max_keys) * math.log(2))
-    
+        self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE))         
+        # More variables here if you need, of course
+        self._hashes = min(8, int((self._data.get_size() / max_keys) * math.log(2)))    
+
     def __str__(self) -> str:
         """
         A helper that allows you to print a BloomFilter type
@@ -95,48 +95,23 @@ class BloomFilter:
         """
         return self._data.get_size()
 
-    def fnv1a_hash(self, key: Any) -> int:
+    def hash1(self, key: Any) -> int:
         byte_array = object_to_byte_array(key)
-        FNV_PRIME = 1099511628211
-        FNV_OFFSET_BASIS = 14695981039346656037
-        
-        hash_value = FNV_OFFSET_BASIS
+        h = 5381
         for byte in byte_array:
-            hash_value ^= byte
-            hash_value *= FNV_PRIME
-            hash_value &= 0xFFFFFFFFFFFFFFFF  # Ensure 64-bit unsigned
-        
-        return hash_value
+            h = ((h << 5) + h) + byte
+        return h & 0xFFFFFFFF
 
-    def murmur_hash(self, key: Any) -> int:
+    def hash2(self, key: Any) -> int:
         byte_array = object_to_byte_array(key)
-        length = len(byte_array)
-        seed = 0x9747b28c
-        c1 = 0x87c37b91114253d5
-        c2 = 0x4cf5ad432745937f
-        
-        h1 = seed
-        for i in range(0, length, 8):
-            k1 = int.from_bytes(byte_array[i:i+8], byteorder='little')
-            k1 = (k1 * c1) & 0xFFFFFFFFFFFFFFFF
-            k1 = ((k1 << 31) | (k1 >> 33)) & 0xFFFFFFFFFFFFFFFF
-            k1 = (k1 * c2) & 0xFFFFFFFFFFFFFFFF
-            h1 ^= k1
-            h1 = ((h1 << 27) | (h1 >> 37)) & 0xFFFFFFFFFFFFFFFF
-            h1 = (h1 * 5 + 0x52dce729) & 0xFFFFFFFFFFFFFFFF
-        
-        h1 ^= length
-        h1 ^= h1 >> 33
-        h1 = (h1 * 0xff51afd7ed558ccd) & 0xFFFFFFFFFFFFFFFF
-        h1 ^= h1 >> 33
-        h1 = (h1 * 0xc4ceb9fe1a85ec53) & 0xFFFFFFFFFFFFFFFF
-        h1 ^= h1 >> 33
-        
-        return h1
+        h = 0
+        for byte in byte_array:
+            h = (h * 31 + byte) & 0xFFFFFFFF
+        return h | 1  # Ensure it's odd for better distribution in double hashing
     
     def get_hash(self, key: Any, index: int) -> int:
-        h1 = self.fnv1a_hash(key)
-        h2 = self.murmur_hash(key)
+        h1 = self.hash1(key)
+        h2 = self.hash2(key)
         return (h1 + index * h2) % self._data.get_size()
     
     def calculate_bit_array_size(self, n: int, p: float) -> int:
