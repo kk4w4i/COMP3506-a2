@@ -5,7 +5,7 @@ Joel Mackenzie and Vladimir Morozov
 """
 import math
 from typing import Any
-from structures.util import Hashable, object_to_byte_array
+from structures.util import object_to_byte_array
 from structures.bit_vector import BitVector
 
 class BloomFilter:
@@ -32,14 +32,15 @@ class BloomFilter:
     [0-255] of course).
     """
 
-    FP_RATE = 0.01
+    FP_RATE = 0.02
 
     def __init__(self, max_keys: int) -> None:
         # You should use max_keys to decide how many bits your bitvector
         # should have, and allocate it accordingly.
         self._data = BitVector()
-        self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE))        # More variables here if you need, of course
-        self._hashes = max(1, int((self._data.get_size() / max_keys) * 0.693))
+        self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE)) 
+         # More variables here if you need, of course
+        self._hashes = int((self._data.get_size() / max_keys) * math.log(2))
     
     def __str__(self) -> str:
         """
@@ -109,5 +110,5 @@ class BloomFilter:
     
     def calculate_bit_array_size(self, n: int, p: float) -> int:
         m = -(n * math.log(p)) / (math.log(2)**2)
-        return math.ceil(m)
+        return int(m)
 
