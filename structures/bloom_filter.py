@@ -38,11 +38,12 @@ class BloomFilter:
     def __init__(self, max_keys: int) -> None:
         # You should use max_keys to decide how many bits your bitvector
         # should have, and allocate it accordingly.
+        self._size = self.calculate_bit_array_size(max_keys, self.FP_RATE)
         self._data = BitVector()
-        self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE))         
+        self._data.allocate(self._size)
         # More variables here if you need, of course
-        self._hashes = min(8, int((self._data.get_size() / max_keys) * math.log(2)))
-        self._size = self._data.get_size()
+        self._hashes = min(8, int((self._size / max_keys) * math.log(2)))
+        self._size_mask = self._size - 1  
  
     def __str__(self) -> str:
         """
@@ -57,8 +58,9 @@ class BloomFilter:
         Insert a key into the Bloom filter.
         Time complexity for full marks: O(1)
         """
+        h1, h2 = self._get_hash_pair(key)
         for i in range(self._hashes):
-            index = self.get_hash(key, i)
+            index = (h1 + i * h2) & self._size_mask
             self._data.set_at(index)
 
     def contains(self, key: Any) -> bool:
@@ -67,7 +69,8 @@ class BloomFilter:
         over k are set. False otherwise.
         Time complexity for full marks: O(1)
         """
-        return all(self._data.get_at(self.get_hash(key, i)) == 1 
+        h1, h2 = self._get_hash_pair(key)
+        return all(self._data.get_at((h1 + i * h2) & self._size_mask) == 1 
                    for i in range(self._hashes))
 
     def __contains__(self, key: Any) -> bool:
@@ -96,26 +99,26 @@ class BloomFilter:
         """
         return self._size
 
-    def hash1(self, key: Any) -> int:
-        byte_array = object_to_byte_array(key)
+    def _hash1(self, byte_array: bytes) -> int:
         h = 5381
         for byte in byte_array:
-            h = ((h << 5) + h + byte) % self._size
+            h = ((h << 5) + h + byte) & self._size_mask
         return h
 
-    def hash2(self, key: Any) -> int:
-        byte_array = object_to_byte_array(key)
+    def _hash2(self, byte_array: bytes) -> int:
         h = 0
         for byte in byte_array:
-            h = (h * 31 + byte) % self._size
-        return (h | 1) % self._size  # Ensure it's odd for better distribution
+            h = (h * 31 + byte) & self._size_mask
+        return (h | 1) & self._size_mask
     
-    def get_hash(self, key: Any, index: int) -> int:
-        h1 = self.hash1(key)
-        h2 = self.hash2(key)
-        return (h1 + index * h2) % self._size
-    
-    def calculate_bit_array_size(self, n: int, p: float) -> int:
+    @staticmethod
+    def calculate_bit_array_size(n: int, p: float) -> int:
         m = -(n * math.log(p)) / (math.log(2)**2)
-        return max(256, int(m))  # Ensure a minimum size of 256 bits
+        return max(256, 1 << math.ceil(math.log2(m)))
+    
+    def _get_hash_pair(self, key: Any) -> tuple[int, int]:
+        byte_array = object_to_byte_array(key)
+        h1 = self._hash1(byte_array)
+        h2 = self._hash2(byte_array)
+        return h1, h2
 
