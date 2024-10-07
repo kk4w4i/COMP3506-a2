@@ -45,7 +45,8 @@ class Map:
         self.size = 0
         for bucket in old_table:
             if bucket:
-                for entry in bucket:
+                for i in range(bucket.get_size()):
+                    entry = bucket[i]
                     self.insert(entry)
         
 
@@ -143,4 +144,13 @@ class Map:
         temp_entry = Entry(key, None)
         print(temp_entry.get_hash() % self.capacity) 
         return temp_entry.get_hash() % self.capacity
+    
+    def __str__(self):
+        result = []
+        for bucket in self.table:
+            if bucket:
+                for i in range(bucket.get_size()):
+                    entry = bucket[i]
+                    result.append(f"'{entry.get_key()}': {entry.get_value()}")
+        return "{" + ", ".join(result) + "}"
 
