@@ -4,6 +4,7 @@ The University of Queensland
 Joel Mackenzie and Vladimir Morozov
 """
 import math
+from structures.entry import Entry
 from typing import Any
 from structures.util import object_to_byte_array
 from structures.bit_vector import BitVector
@@ -65,11 +66,8 @@ class BloomFilter:
         over k are set. False otherwise.
         Time complexity for full marks: O(1)
         """
-        for i in range(self._hashes):
-            index = self.get_hash(key, i)
-            if self._data.get_at(index) == 0:
-                return False
-        return True
+        return all(self._data.get_at(self.get_hash(key, i)) == 1 
+                   for i in range(self._hashes))
 
     def __contains__(self, key: Any) -> bool:
         """
@@ -97,15 +95,17 @@ class BloomFilter:
         """
         return self._data.get_size()
 
-    def get_hash(self, item: Any, hash_num: int) -> int:
-        byte_array = object_to_byte_array(item)
-        
+    def get_hash(self, key: Any, hash_num: int) -> int:
+        byte_array = object_to_byte_array(key)
+        mask = (1 << 32) - 1
+        h = hash_num 
+
         hash_value = 0
         for byte in byte_array:
-            # Modify the byte based on the hash function number
-            modified_byte = (byte + hash_num) & 0xFF
-            hash_value = (hash_value * 29 + modified_byte) & 0xFFFFFFFF
-        
+            hash_value = ((h << 5) & mask) | (h >> 27)
+            hash_value += byte
+            h = hash_value
+
         return hash_value % self._data.get_size()
     
     def calculate_bit_array_size(self, n: int, p: float) -> int:
