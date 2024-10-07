@@ -3,6 +3,7 @@ Skeleton for COMP3506/7505 A2, S2, 2024
 The University of Queensland
 Joel Mackenzie and Vladimir Morozov
 """
+import math
 from typing import Any
 from structures.util import Hashable, object_to_byte_array
 from structures.bit_vector import BitVector
@@ -31,15 +32,13 @@ class BloomFilter:
     [0-255] of course).
     """
 
-    HASH_FUNCTIONS = 3
+    FP_RATE = 0.01
 
     def __init__(self, max_keys: int) -> None:
         # You should use max_keys to decide how many bits your bitvector
         # should have, and allocate it accordingly.
         self._data = BitVector()
-        self._data.allocate(max_keys * 6)
-        # More variables here if you need, of course
-        self._max_keys = max_keys
+        self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE))        # More variables here if you need, of course
         self._hashes = max(1, int((self._data.get_size() / max_keys) * 0.693))
     
     def __str__(self) -> str:
@@ -107,4 +106,8 @@ class BloomFilter:
             hash_value = (hash_value * 29 + modified_byte) & 0xFFFFFFFF
         
         return hash_value % self._data.get_size()
+    
+    def calculate_bit_array_size(self, n: int, p: float) -> int:
+        m = -(n * math.log(p)) / (math.log(2)**2)
+        return math.ceil(m)
 
