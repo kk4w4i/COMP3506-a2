@@ -64,7 +64,9 @@ class Map:
         if self.table[index] is None:
             self.table[index] = DynamicArray()
         else:
-            for exist_entry in self.table[index]:
+            bucket = self.table[index]
+            for i in range(bucket.get_size()):
+                exist_entry = bucket[i]
                 if exist_entry == entry:
                     old_value = exist_entry.get_value()
                     exist_entry.update_value(entry.get_value())
