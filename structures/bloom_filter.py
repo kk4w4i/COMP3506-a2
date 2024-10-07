@@ -41,8 +41,9 @@ class BloomFilter:
         self._data = BitVector()
         self._data.allocate(self.calculate_bit_array_size(max_keys, self.FP_RATE))         
         # More variables here if you need, of course
-        self._hashes = min(8, int((self._data.get_size() / max_keys) * math.log(2)))    
-
+        self._hashes = min(8, int((self._data.get_size() / max_keys) * math.log(2)))
+        self._size = self._data.get_size()
+ 
     def __str__(self) -> str:
         """
         A helper that allows you to print a BloomFilter type
@@ -99,22 +100,22 @@ class BloomFilter:
         byte_array = object_to_byte_array(key)
         h = 5381
         for byte in byte_array:
-            h = ((h << 5) + h) + byte
-        return h & 0xFFFFFFFF
+            h = ((h << 5) + h + byte) % self._size
+        return h
 
     def hash2(self, key: Any) -> int:
         byte_array = object_to_byte_array(key)
         h = 0
         for byte in byte_array:
-            h = (h * 31 + byte) & 0xFFFFFFFF
-        return h | 1  # Ensure it's odd for better distribution in double hashing
+            h = (h * 31 + byte) % self._size
+        return (h | 1) % self._size  # Ensure it's odd for better distribution
     
     def get_hash(self, key: Any, index: int) -> int:
         h1 = self.hash1(key)
         h2 = self.hash2(key)
-        return (h1 + index * h2) % self._data.get_size()
+        return (h1 + index * h2) % self._size
     
     def calculate_bit_array_size(self, n: int, p: float) -> int:
         m = -(n * math.log(p)) / (math.log(2)**2)
-        return int(m)
+        return max(256, int(m))  # Ensure a minimum size of 256 bits
 
