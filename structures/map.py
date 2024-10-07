@@ -41,7 +41,7 @@ class Map:
     def _resize(self) -> None:
         old_table = self.table
         self.capacity *= 2
-        self.table = [[None] * self.capacity]
+        self.table = [None] * self.capacity
         self.size = 0
         for bucket in old_table:
             if bucket:
