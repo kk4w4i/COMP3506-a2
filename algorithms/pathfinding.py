@@ -38,8 +38,33 @@ def bfs_traversal(
     path = DynamicArray()
 
     # ALGO GOES HERE
+    dq = PriorityQueue()
+    parent = Map()
+    stacked_path = PriorityQueue()
+    visited = [False] * len(graph._nodes)
+    
+    # insert and update for the origin node
+    dq.insert_fifo(origin)
+    parent[origin] = None
+    visited[origin] = True
 
-    # Return the path and the visited nodes list
+    while dq:
+      node = dq.remove_min()
+      visited_order.append(node)
+      if node == goal:
+        current = node
+        while current is not None:
+          stacked_path.insert_fifo(current)
+          current = parent[current]
+        path = stacked_path.get_array()
+        break
+
+      for neighbour in graph.get_neighbours(node):
+        if (neighbour is not None) and (not visited[neighbour.get_id()]):
+          visited[neighbour.get_id()] = True
+          parent[neighbour] = node
+          dq.insert_fifo(neighbour.get_id())
+    
     return (path, visited_order)
 
 def dijkstra_traversal(graph: Graph, origin: int) -> DynamicArray:

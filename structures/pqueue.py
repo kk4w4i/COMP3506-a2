@@ -4,7 +4,7 @@ The University of Queensland
 Joel Mackenzie and Vladimir Morozov
 """
 
-from typing import Any
+from typing import Any, List
 from structures.entry import Entry
 from structures.dynamic_array import DynamicArray
 
@@ -160,12 +160,11 @@ class PriorityQueue:
 
         return self._arr
     
-    def get_arrary(self) -> DynamicArray:
-        result = []
+    def get_array(self) -> DynamicArray:
+        result = DynamicArray()
         size = self._arr.get_size()
         for i in range(size):
-            result.append(self._arr[i])
-
+            result.append(self._arr[i].get_value())
         return result
     
     def _heapify(self, root: int, size: int) -> None:
