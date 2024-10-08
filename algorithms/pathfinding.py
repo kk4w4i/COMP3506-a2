@@ -49,21 +49,23 @@ def bfs_traversal(
     visited[origin] = True
 
     while dq:
-      node = dq.remove_min()
-      visited_order.append(node)
-      if node == goal:
-        current = node
-        while current is not None:
-          stacked_path.insert_fifo(current)
-          current = parent[current]
+      node_id = dq.remove_min()
+      visited_order.append(node_id)
+
+      if node_id == goal:
+        current_id = node_id
+        while current_id is not None:
+          stacked_path.insert_fifo(current_id)
+          current_id = parent[current_id]
         path = stacked_path.get_array()
         break
 
-      for neighbour in graph.get_neighbours(node):
-        if (neighbour is not None) and (not visited[neighbour.get_id()]):
-          visited[neighbour.get_id()] = True
-          parent[neighbour.get_id()] = node
-          dq.insert_fifo(neighbour.get_id())
+      for neighbour in graph.get_neighbours(node_id):
+            neighbour_id =neighbour.get_id()
+            if neighbour_id is not None and 0 <= neighbour_id < len(visited) and not visited[neighbour_id]:
+                visited[neighbour_id] = True
+                parent[neighbour_id] = node_id
+                dq.insert_fifo(neighbour_id)
     
     return (path, visited_order)
 
