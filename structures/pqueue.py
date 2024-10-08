@@ -163,7 +163,7 @@ class PriorityQueue:
     def get_array(self) -> DynamicArray:
         result = DynamicArray()
         size = self._arr.get_size()
-        for i in range(size):
+        for i in range(size - 1, -1, -1):  # Start from size-1 to include the last element
             result.append(self._arr[i].get_value())
         return result
     
