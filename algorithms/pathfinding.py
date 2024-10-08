@@ -50,6 +50,10 @@ def bfs_traversal(
 
     while dq:
       node_id = dq.remove_min()
+      
+      if node_id is None:
+          return (path, visited_order)
+      
       visited_order.append(node_id)
 
       if node_id == goal:
