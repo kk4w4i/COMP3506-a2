@@ -50,7 +50,7 @@ def bfs_traversal(
 
     while dq:
       node_id = dq.remove_min()
-      
+
       if node_id is None:
           return (path, visited_order)
       
@@ -93,7 +93,40 @@ def dijkstra_traversal(graph: Graph, origin: int) -> DynamicArray:
     valid_locations = DynamicArray() # This holds your answers
 
     # ALGO GOES HERE
+    cloud = Map()
+    graph_size = len(graph._nodes)
+    visited = [False] * graph_size
+    for i in range(graph_size):
+        cloud[i] = float('inf')
+    cloud[origin] = 0
+    print(cloud)
 
+    for _ in range(graph_size):
+        min_distance = float('inf')
+        current = None
+        for i in range(graph_size):
+          if not visited[i] and cloud[i] < min_distance:
+            min_distance = cloud[i]
+            current = i
+
+        if current is None:
+           break
+        
+        visited[current] = True
+
+        for neighbour in graph.get_neighbours(current):
+           neighbour_id = neighbour[0].get_id()
+           if neighbour_id is not None and 0 <= neighbour_id < len(visited) and not visited[neighbour_id]:
+              alt = cloud[current] + neighbour[1]
+              if alt < cloud[neighbour_id]:
+                 cloud[neighbour_id] = alt
+       
+    print(cloud)
+    for i in range(graph_size):
+       if cloud[i] < float('inf'):
+          entry = Entry(i, cloud[i])
+          valid_locations.append(entry)
+    
     # Return the DynamicArray containing Entry types
     return valid_locations
 
