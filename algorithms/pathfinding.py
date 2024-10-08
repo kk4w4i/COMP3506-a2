@@ -53,6 +53,7 @@ def bfs_traversal(
       visited_order.append(node)
       if node == goal:
         current = node
+        stacked_path.insert_fifo(origin)
         while current is not None:
           stacked_path.insert_fifo(current)
           current = parent[current]
