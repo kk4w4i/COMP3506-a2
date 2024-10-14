@@ -99,7 +99,6 @@ def dijkstra_traversal(graph: Graph, origin: int) -> DynamicArray:
     for i in range(graph_size):
         cloud[i] = float('inf')
     cloud[origin] = 0
-    print(cloud)
 
     for _ in range(graph_size):
         min_distance = float('inf')
@@ -121,7 +120,6 @@ def dijkstra_traversal(graph: Graph, origin: int) -> DynamicArray:
               if alt < cloud[neighbour_id]:
                  cloud[neighbour_id] = alt
        
-    print(cloud)
     for i in range(graph_size):
        if cloud[i] < float('inf'):
           entry = Entry(i, cloud[i])

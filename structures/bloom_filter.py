@@ -42,7 +42,11 @@ class BloomFilter:
         self._data = BitVector()
         self._data.allocate(self._size)
         # More variables here if you need, of course
-        self._hashes = min(8, int((self._size / max_keys) * math.log(2)))
+        calculated_hashes = int((self._size / max_keys) * math.log(2))
+        if calculated_hashes > 8:
+            self._hashes = 8
+        else:
+            self._hashes = calculated_hashes
         self._size_mask = self._size - 1  
  
     def __str__(self) -> str:
@@ -114,7 +118,10 @@ class BloomFilter:
     @staticmethod
     def calculate_bit_array_size(n: int, p: float) -> int:
         m = -(n * math.log(p)) / (math.log(2)**2)
-        return max(256, 1 << math.ceil(math.log2(m)))
+        calculated_size = 1 << math.ceil(math.log2(m))
+        if calculated_size < 256:
+            return 256
+        return calculated_size
     
     def _get_hash_pair(self, key: Any) -> tuple[int, int]:
         byte_array = object_to_byte_array(key)

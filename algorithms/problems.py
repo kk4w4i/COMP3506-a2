@@ -66,13 +66,19 @@ def maybe_maybe_maybe(database: list[str], query: list[str]) -> list[str]:
     You must pass each test in the given time limit and be under the given
     fp_rate to get the associated mark for that test.
     """
-    answer = [] 
+    answer = DynamicArray() 
 
     # DO THE THING
+    size = len(database)
+    bf = BloomFilter(size)
+    for k in database:
+        bf.insert(k)
+
+    for q in query:
+        if bf.contains(q) == True:
+            answer.append(q)
 
     return answer
-
-
 
 def dora(graph: Graph, start: int, symbol_sequence: str,
          ) -> tuple[BitVector, list[Entry]]:
