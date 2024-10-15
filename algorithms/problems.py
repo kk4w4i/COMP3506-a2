@@ -68,15 +68,15 @@ def maybe_maybe_maybe(database: list[str], query: list[str]) -> list[str]:
     """
     answer = DynamicArray() 
 
-    # DO THE THING
-    size = len(database)
-    bf = BloomFilter(size)
-    for k in database:
-        bf.insert(k)
+    # # DO THE THING
+    # size = len(database)
+    # bf = BloomFilter(size)
+    # for k in database:
+    #     bf.insert(k)
 
-    for q in query:
-        if bf.contains(q) == True:
-            answer.append(q)
+    # for q in query:
+    #     if bf.contains(q) == True:
+    #         answer.append(q)
 
     return answer
 
@@ -199,27 +199,27 @@ def labyrinth(offers: list[Offer]) -> tuple[int, int]:
     min_offer = PriorityQueue()
     best_offer_id = -1
     best_offer_cost = float('inf')
-    # DO THE THING
+    # # DO THE THING
 
-    for offer in offers:
-        n = offer.get_num_nodes()
-        m = offer.get_num_edges()
-        k = offer.get_diameter()
-        cost = offer.get_cost()
-        oid = offer.get_offer_id()
+    # for offer in offers:
+    #     n = offer.get_num_nodes()
+    #     m = offer.get_num_edges()
+    #     k = offer.get_diameter()
+    #     cost = offer.get_cost()
+    #     oid = offer.get_offer_id()
 
-        if (m >= n - 1 and  # Lower bound on edges
-            m <= n * (n - 1) // 2 and  # Upper bound on edges
-            n >= k + 1 and  # Lower bound on vertices for a given diameter
-            k <= n - 1 and  # Upper bound on diameter
-            m >= n - 1 and  # Ensure connectivity
-            1 <= k < n - 1):  # Valid diameter range
-            min_offer.insert(cost, oid)
+    #     if (m >= n - 1 and  # Lower bound on edges
+    #         m <= n * (n - 1) // 2 and  # Upper bound on edges
+    #         n >= k + 1 and  # Lower bound on vertices for a given diameter
+    #         k <= n - 1 and  # Upper bound on diameter
+    #         m >= n - 1 and  # Ensure connectivity
+    #         1 <= k < n - 1):  # Valid diameter range
+    #         min_offer.insert(cost, oid)
     
-    best_offer_id = min_offer.get_min_value()
-    best_offer_cost = min_offer.get_min_priority()
+    # best_offer_id = min_offer.get_min_value()
+    # best_offer_cost = min_offer.get_min_priority()
 
-    print(min_offer.get_size())
+    # print(min_offer.get_size())
 
     return (best_offer_id, best_offer_cost)
 
